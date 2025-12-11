@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Safe Code Executor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      white-space: pre-wrap;
+      border-radius: 4px;
+    }
+    .error {
+      color: #b00020;
+      font-weight: bold;
+    }
+    .success {
+      color: #006400;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Safe Python Code Executor (Docker)</h1>
+  <p>Type your Python code below and click <strong>Run</strong>.</p>
+
+  <textarea id="code"></textarea>
+  <br>
+  <button onclick="runCode()">Run</button>
+
+  <h2>Result</h2>
+  <div id="result"></div>
+
+  <script>
+    async function runCode() {
+      const code = document.getElementById("code").value;
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "Running...";
+
+      try {
+        const response = await fetch("/run", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          resultDiv.innerHTML =
+            '<div class="success">Output:</div><pre>' +
+            (data.output || "(no output)") +
+            "</pre>";
+        } else {
+          resultDiv.innerHTML =
+            '<div class="error">Error:</div><pre>' +
+            (data.error || "Unknown error") +
+            "</pre>";
+        }
+      } catch (err) {
+        resultDiv.innerHTML =
+          '<div class="error">Request failed:</div><pre>' +
+          err.toString() +
+          "</pre>";
+      }
+    }
+
+    // Some default example code
+    document.getElementById("code").value =
+`print("Hello")
+x = 5 + 3
+print(x)
+for i in range(5):
+    print(i)`;
+  </script>
+</body>
+</html>
